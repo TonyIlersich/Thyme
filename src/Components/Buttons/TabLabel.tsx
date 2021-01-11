@@ -22,6 +22,7 @@ const TabLabelText = styled(TextLine)<{ isSelected: boolean }>`
 	font-weight: 900;
 	color: ${props => props.isSelected ? Colors.TextLight : Colors.TextDark};
 	pointer-events: none;
+	user-select: none;
 `;
 
 const TabLabel = (props: Props) => (
