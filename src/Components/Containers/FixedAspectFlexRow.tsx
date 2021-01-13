@@ -3,8 +3,9 @@ import styled from 'styled-components';
 import FlexRow from 'Components/Containers/FlexRow';
 
 type Props = {
+	className?: string;
 	children: React.ReactNode;
-	ratio: number;
+	aspect: number;
 };
 
 const Outer = styled(FlexRow)<{ ratio: number }>`
@@ -24,7 +25,7 @@ const Inner = styled(FlexRow)`
 `;
 
 const FixedAspectFlexRow = (props: Props) => (
-	<Outer ratio={props.ratio}>
+	<Outer className={props.className} ratio={props.aspect}>
 		<Inner>
 			{props.children}
 		</Inner>

@@ -16,7 +16,7 @@ type State = {
 };
 
 const TabLabelsContainer = styled(FlexRow)`
-	border-bottom: ${Borders.Medium}px solid ${Colors.SuperDark};
+	border-bottom: ${Borders.Thick}px solid ${Colors.SuperDark};
 	flex-grow: 0;
 `;
 

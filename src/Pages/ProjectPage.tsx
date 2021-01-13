@@ -11,11 +11,16 @@ import Margins from 'Styles/Margins';
 
 type Props = {
 	projects: Project[];
+	activeTaskInfo: {
+		projectId: Project['id'];
+		taskId: Task['id'];
+	} | null;
 	onValidateProject: (project: Project) => string | undefined;
 	onCreateProject: (project: Project) => void;
 	onValidateTask: (project: Project, task: Readonly<Task>) => string | undefined;
 	onCreateTask: (project: Project, task: Readonly<Task>) => void;
 	onEditTask: (project: Project, task: Readonly<Task>) => void;
+	onActivateTask: (projectId: Project['id'], taskId: Task['id']) => void;
 };
 
 type State = {
@@ -36,6 +41,7 @@ export default class ProjectPage extends React.Component<Props, State> {
 	};
 
 	render() {
+		const selectedTask = this.state.selection?.project.tasks.find(t => t.id === this.state.selection!.taskId)!;
 		return (
 			<FlexRow>
 				<FlexColumn>
@@ -43,6 +49,8 @@ export default class ProjectPage extends React.Component<Props, State> {
 						<ProjectViewWithMargin
 							key={i}
 							project={p}
+							selectedTaskId={this.state.selection?.taskId}
+							activeTaskId={this.props.activeTaskInfo?.taskId}
 							onValidateTask={this.props.onValidateTask}
 							onCreateTask={this.props.onCreateTask}
 							onSelect={(project, task) => this.setState({ selection: { project, taskId: task.id } })}
@@ -53,12 +61,14 @@ export default class ProjectPage extends React.Component<Props, State> {
 						onSubmit={this.props.onCreateProject}
 					/>
 				</FlexColumn>
-				{this.state.selection && (
+				{selectedTask && (
 					<DetailedTaskView
-						project={this.state.selection.project}
-						task={this.state.selection.project.tasks.find(t => t.id === this.state.selection!.taskId)!}
+						project={this.state.selection!.project}
+						task={selectedTask}
+						isTaskActive={this.props.activeTaskInfo?.taskId === selectedTask.id}
 						onValidateTask={this.props.onValidateTask}
 						onEditTask={this.props.onEditTask}
+						onActivateTask={this.props.onActivateTask}
 					/>
 				)}
 			</FlexRow>

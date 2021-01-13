@@ -1,6 +1,6 @@
 const Colors = {
-	Light: '#333',
 	Dark: '#222',
+	Light: '#333',
 	SuperDark: '#111',
 	SuperLight: '#555',
 	TextDark: '#666',

@@ -12,6 +12,8 @@ import Margins from 'Styles/Margins';
 type Props = {
 	className?: string;
 	project: Project;
+	selectedTaskId: string | undefined;
+	activeTaskId: string | undefined;
 	onValidateTask: (project: Project, task: Task) => string | undefined;
 	onCreateTask: (project: Project, task: Task) => void;
 	onSelect: (project: Project, task: Task) => void;
@@ -32,7 +34,13 @@ const ProjectView = (props: Props) => (
 	<ProjectViewContainer className={props.className}>
 		<ProjectTitle>{props.project.name}</ProjectTitle>
 		{props.project.tasks.map((t, i) => (
-			<TaskView key={i} task={t} onSelect={task => props.onSelect(props.project, task)} />
+			<TaskView
+				key={i}
+				task={t}
+				isSelected={t.id === props.selectedTaskId}
+				isActive={t.id === props.activeTaskId}
+				onSelect={task => props.onSelect(props.project, task)}
+			/>
 		))}
 		<CreateTaskForm
 			onValidate={task => props.onValidateTask(props.project, task)}

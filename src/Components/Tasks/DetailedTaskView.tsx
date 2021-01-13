@@ -1,22 +1,25 @@
+import Button from 'Components/Buttons/Button';
 import FlexColumn from 'Components/Containers/FlexColumn';
 import FlexRow from 'Components/Containers/FlexRow';
 import TextLineInput from 'Components/Inputs/TextLineInput';
 import TextLine from 'Components/Texts/TextLine';
 import Project from 'Models/Project';
-import Task from 'Models/Task';
+import Task, { TaskStatus } from 'Models/Task';
 import React from 'react';
 import styled from 'styled-components';
 import Borders from 'Styles/Borders';
 import Colors from 'Styles/Colors';
 import { FontSizes } from 'Styles/Fonts';
 import Margins from 'Styles/Margins';
-import { formatTime, parseTimeAsMs, TimeUnit } from 'Utils/TimeUtils';
+import { formatAsTimeSpan, parseTimeSpanAsMs, TimeSpanUnit } from 'Utils/TimeUtils';
 
 type Props = {
 	project: Project;
 	task: Task;
+	isTaskActive: boolean;
 	onValidateTask: (project: Project, task: Task) => string | undefined;
 	onEditTask: (project: Project, task: Task) => void;
+	onActivateTask: (projectId: Project['id'], taskId: Task['id']) => void;
 };
 
 type State = {
@@ -66,15 +69,22 @@ export default class DetailedTaskView extends React.Component<Props, State> {
 					<Form onSubmit={this.onSubmitChanges}>
 						<TextLine>{this.props.project.name}</TextLine>
 						<TaskTitle>{this.props.task.name}</TaskTitle>
-						<TextLine>{this.props.task.status}</TextLine>
 						<FlexRow>
-							<TextLine>{formatTime(this.props.task.accruedDuration)}</TextLine>
+							<TextLine>{this.props.task.status}</TextLine>
+							{!this.props.isTaskActive && this.props.task.status !== TaskStatus.Done && (
+								<Button onClick={() => this.props.onActivateTask(this.props.project.id, this.props.task.id)}>
+									{this.props.task.status === TaskStatus.ToDo ? 'Begin' : 'Resume'}
+								</Button>
+							)}
+						</FlexRow>
+						<FlexRow>
+							<TextLine>{formatAsTimeSpan(this.props.task.accruedDuration)}</TextLine>
 							<TextLineInput
 								placeholder='estimate...'
 								value={this.state.edits.estimatedDuration === undefined
 									? (this.props.task.estimatedDuration === undefined
 										? ''
-										: formatTime(this.props.task.estimatedDuration, TimeUnit.Millisecond)
+										: formatAsTimeSpan(this.props.task.estimatedDuration, TimeSpanUnit.Millisecond)
 									) : this.state.edits.estimatedDuration}
 								onChange={this.onChangeEstimatedDuration}
 							/>
@@ -96,7 +106,7 @@ export default class DetailedTaskView extends React.Component<Props, State> {
 			...this.props.task,
 			...(this.state.edits.estimatedDuration !== undefined && {
 				estimatedDuration: this.state.edits.estimatedDuration
-				? parseTimeAsMs(this.state.edits.estimatedDuration)
+				? parseTimeSpanAsMs(this.state.edits.estimatedDuration)
 				: undefined,
 			}),
 		};

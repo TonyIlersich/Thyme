@@ -5,6 +5,7 @@ import React from 'react';
 import styled from 'styled-components';
 import Colors from 'Styles/Colors';
 import Margins from 'Styles/Margins';
+import { v4 as uuid } from 'uuid';
 
 type Props = {
 	onValidate: (task: Readonly<Project>) => string | undefined;
@@ -65,6 +66,7 @@ export default class CreateProjectForm extends React.Component<Props, State> {
 	onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
 		e.preventDefault();
 		const newProject = {
+			id: uuid(),
 			name: this.state.projectName,
 			tasks: [],
 		};

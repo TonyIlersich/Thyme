@@ -1,13 +1,31 @@
 import dayjs from 'dayjs';
 
-export const MsPerDay = 24 * 60 * 60 * 1000;
+export const MsPerMinute = 60 * 1000;
+export const MsPerHour = MsPerMinute * 60;
+export const MsPerDay = MsPerHour * 24;
 
 export const getMsSinceDayStart = () => {
 	const now = dayjs();
 	return now.diff(now.startOf('day'));
 };
 
-export enum TimeUnit {
+export enum DayOfWeek {
+	Sunday = 'Sunday',
+	Monday = 'Monday',
+	Tuesday = 'Tuesday',
+	Wednesday = 'Wednesday',
+	Thursday = 'Thursday',
+	Friday = 'Friday',
+	Saturday = 'Saturday',
+};
+
+export const DaysOfWeek = Object.values(DayOfWeek);
+
+export const getDayOfWeek = () => {
+	return DaysOfWeek[dayjs().day()];
+};
+
+export enum TimeSpanUnit {
 	Millisecond = 'ms',
 	Second = 's',
 	Minute = 'm',
@@ -16,7 +34,7 @@ export enum TimeUnit {
 	Week = 'w',
 }
 
-const TimeUnits = Object.values(TimeUnit);
+const TimeSpanUnits = Object.values(TimeSpanUnit);
 
 // Note: This assumes 8h in a work day and 5d in a work week.
 //       This will not match real-time days and weeks.
@@ -32,13 +50,13 @@ const ConversionFactors = {
 // const convert = (t: number, fromUnit: TimeUnit, toUnit: TimeUnit) =>
 // 	t * (ConversionFactors[fromUnit] / ConversionFactors[toUnit]);
 
-type TimeComponents = {
-	[k in TimeUnit]: number;
+type TimeSpanComponents = {
+	[k in TimeSpanUnit]: number;
 };
 
-const timeZero: TimeComponents = { ms: 0, s: 0, m: 0, h: 0, d: 0, w: 0 };
+const timeZero: TimeSpanComponents = { ms: 0, s: 0, m: 0, h: 0, d: 0, w: 0 };
 
-const msToComponents = (ms: number): TimeComponents => {
+const msToComponents = (ms: number): TimeSpanComponents => {
 	return {
 		ms: Math.floor(ms % ConversionFactors.s / ConversionFactors.ms),
 		s:  Math.floor(ms % ConversionFactors.m / ConversionFactors.s),
@@ -49,19 +67,19 @@ const msToComponents = (ms: number): TimeComponents => {
 	};
 };
 
-const componentsToMs = (tc: TimeComponents) => {
-	return TimeUnits.reduce((prev, u) => prev + tc[u] * ConversionFactors[u], 0);
+const componentsToMs = (tc: TimeSpanComponents) => {
+	return TimeSpanUnits.reduce((prev, u) => prev + tc[u] * ConversionFactors[u], 0);
 };
 
-export const formatTime = (ms: number, roundTo: TimeUnit = TimeUnit.Minute): string => {
+export const formatAsTimeSpan = (ms: number, roundTo: TimeSpanUnit = TimeSpanUnit.Minute): string => {
 	const roundedMs = Math.round(ms / ConversionFactors[roundTo]) * ConversionFactors[roundTo];
 	const components = msToComponents(roundedMs);
-	return TimeUnits.filter(u => components[u]).map(u => `${components[u]}${u}`).reverse().join(' ') || `0${roundTo}`;
+	return TimeSpanUnits.filter(u => components[u]).map(u => `${components[u]}${u}`).reverse().join(' ') || `0${roundTo}`;
 };
 
-const parseTimeAsComponents = (formatted: string): TimeComponents => {
+const parseTimeSpanAsComponents = (formatted: string): TimeSpanComponents => {
 	const components = { ...timeZero };
-	TimeUnits.forEach(u => {
+	TimeSpanUnits.forEach(u => {
 		const [comp] = formatted.match(new RegExp(`(\\d*.)?\\d+${u}\\b`, 'ig')) || [];
 		if (comp) {
 			const [value] = comp.match(/(\d*.)?\d+/g) || [];
@@ -71,6 +89,10 @@ const parseTimeAsComponents = (formatted: string): TimeComponents => {
 	return components;
 };
 
-export const parseTimeAsMs = (formatted: string): number => {
-	return componentsToMs(parseTimeAsComponents(formatted));
+export const parseTimeSpanAsMs = (formatted: string): number => {
+	return componentsToMs(parseTimeSpanAsComponents(formatted));
+};
+
+export const formatAsTimeOfDay = (ms: number) => {
+	return `${Math.floor(ms / MsPerHour) % 24}:${(Math.floor(ms / MsPerMinute) % 60).toString().padStart(2, '0')}`;
 };
